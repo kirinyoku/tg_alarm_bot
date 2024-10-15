@@ -29,8 +29,8 @@ const (
 
 // New creates a new Client instance with the provided host and token.
 // It sets the base API path using the provided token.
-func New(host, token string) Client {
-	return Client{
+func New(host, token string) *Client {
+	return &Client{
 		host:     host,
 		basePath: newBasePath(token),
 		client:   http.Client{},
@@ -64,8 +64,8 @@ func (c *Client) Updates(offset, limit int) ([]Update, error) {
 // Returns an error if the message could not be sent.
 func (c *Client) SendMessage(chatID int, text string) error {
 	q := url.Values{}
-	q.Add("offset", strconv.Itoa(chatID))
-	q.Add("limit", text)
+	q.Add("chat_id", strconv.Itoa(chatID))
+	q.Add("text", text)
 
 	_, err := c.doRequest(sendMessageMethod, q)
 	if err != nil {
