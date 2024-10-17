@@ -62,10 +62,19 @@ func (c *Client) Updates(offset, limit int) ([]Update, error) {
 // SendMessage sends a message to a specific chat identified by chatID.
 // It takes the chatID and the message text as parameters.
 // Returns an error if the message could not be sent.
-func (c *Client) SendMessage(chatID int, text string) error {
+func (c *Client) SendMessage(chatID int, text string, parseMod string) error {
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatID))
 	q.Add("text", text)
+
+	switch parseMod {
+	case "Markdown":
+		q.Add("parse_mode", "Markdown")
+	case "MarkdownV2":
+		q.Add("parse_mode", "MarkdownV2")
+	case "HTML":
+		q.Add("parse_mode", "HTML")
+	}
 
 	_, err := c.doRequest(sendMessageMethod, q)
 	if err != nil {

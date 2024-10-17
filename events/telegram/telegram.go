@@ -78,7 +78,7 @@ func (p *Processor) processMessage(event events.Event) error {
 		return e.Wrap("can't process message", err)
 	}
 
-	return p.tg.SendMessage(m.ChatID, "This bot does not interact directly.")
+	return p.tg.SendMessage(m.ChatID, "This bot does not interact directly.", "")
 }
 
 // meta extracts metadata from the event's Meta field and casts it to the Meta type.
