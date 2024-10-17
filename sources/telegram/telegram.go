@@ -4,6 +4,7 @@
 package telegram
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -78,6 +79,7 @@ func (s *Source) Process(message sources.Message) error {
 	return s.tg.SendMessage(
 		s.ToChannel,
 		message.Text,
+		"HTML",
 	)
 }
 
@@ -117,7 +119,7 @@ func (s *Source) filter(r io.Reader) ([]sources.Message, error) {
 				s.seen[messageID] = time.Now()
 				messages = append(messages, sources.Message{
 					ID:   messageID,
-					Text: s.cleanMessage(messageText),
+					Text: s.formatMessage(messageText, messageID),
 				})
 			}
 		}
@@ -129,9 +131,18 @@ func (s *Source) filter(r io.Reader) ([]sources.Message, error) {
 // cleanMessage removes unwanted phrases from the message text and trims whitespace.
 // It iterates over the PhrasesToRemove and applies them to the message.
 func (s *Source) cleanMessage(text string) string {
+	if len(s.PhrasesToRemove) == 0 {
+		return text
+	}
+
 	for _, phrase := range s.PhrasesToRemove {
 		text = strings.ReplaceAll(text, phrase, "")
 	}
 
 	return strings.TrimSpace(text)
+}
+
+// formatMessage formats a message by cleaning it and appending a source link.
+func (s *Source) formatMessage(text string, id string) string {
+	return fmt.Sprintf("%s\n\n<a href=\"https://t.me/%s\">Джерело</a>", s.cleanMessage(text), id)
 }
