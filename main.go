@@ -15,9 +15,8 @@ import (
 )
 
 const (
-	tgBotHost = "api.telegram.org"     // Telegram API host address.
-	dataPath  = "./data/channels.json" // Path to the JSON file containing channel configurations.
-	batchSize = 100                    // Number of events to process in a single batch.
+	tgBotHost = "api.telegram.org" // Telegram API host address.
+	batchSize = 100                // Number of events to process in a single batch.
 )
 
 var (
@@ -25,11 +24,16 @@ var (
 )
 
 func main() {
+	token := flag.String("t", "", "token for access to telegram bot")
+	filePath := flag.String("p", "./data/channels.json", "path to the file with channel data")
+
+	flag.Parse()
+
 	// Create a new Telegram client using the provided bot token.
-	tg := tg_client.New(tgBotHost, mustToken())
+	tg := tg_client.New(tgBotHost, mustToken(*token))
 
 	// Load the list of channels from the specified JSON file.
-	channels, err := loadChannels(dataPath)
+	channels, err := loadChannels(*filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,22 +79,19 @@ func main() {
 // mustToken parses the token flag from the command-line arguments.
 // If the token flag ("-t") is not specified, the function logs a fatal error and exits the program.
 // If the token is provided, it returns the token as a string.
-func mustToken() string {
-	token := flag.String("t", "", "token for access to telegram bot")
-	flag.Parse()
-
-	if *token == "" {
+func mustToken(token string) string {
+	if token == "" {
 		log.Fatal("token is not specified")
 	}
 
-	return *token
+	return token
 }
 
 // loadChannels loads the Telegram channel configurations from a JSON file.
 // It reads the file and unmarshals the JSON data into a slice of Source structs.
 // Returns the loaded channels or an error if the loading fails.
-func loadChannels(filename string) ([]tg_sources.Source, error) {
-	file, err := os.Open(filename)
+func loadChannels(filePath string) ([]tg_sources.Source, error) {
+	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
